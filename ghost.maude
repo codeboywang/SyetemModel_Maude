@@ -1,0 +1,149 @@
+fmod POSITION is
+    sort Position .
+    op !_ : Position -> Position .
+    ops Left Right : -> Position .
+
+    ---var Left Right : Position
+    eq !( Left ) = Right .
+    eq !( Right ) = Left .
+
+endfm
+
+fmod PASSENGER is
+    including QID-LIST .
+    including POSITION .
+
+    sorts Type Passenger .
+    ---subsort Type < Passenger .
+    ops M G : -> Type .
+    op P(_,_) : Type Position -> Passenger [ctor] .
+
+    ---mb P(t1,p1) : Passenger .
+    ---op P(_,_,_) : Qid Type Position -> Passenger .
+    ---ops M1 M2 M3 G1 G2 G3 -> Passenger . 
+
+endfm
+
+fmod BOAT is
+    sort Boat .
+    including POSITION .
+
+    op B(_) : Position -> Boat .
+    ---op B(_,_) : Qid Position -> Boat .
+
+endfm
+
+fmod STATE is 
+    sort State .
+    including PASSENGER .
+    including BOAT .
+    subsort Passenger < State .
+    subsort Boat < State .
+    op nil : -> State [ctor].
+    op _,_ : State State -> State [ctor assoc id: nil] .
+
+endfm 
+
+fmod SAFE is
+    including STATE .
+    including PASSENGER .
+    including POSITION .
+
+    op Safe(_) : State -> Bool .
+    var p1 : Position .
+    var s1 : State .
+    var t1 : Type .
+    var b1 : Boat .
+    ops numML(_) numGL(_) numMR(_) numGR(_) : State -> Nat .
+
+    eq numML(nil) = 0 .
+    eq numML(b1) = 0 .
+    ceq numML( P( t1 , p1 ) , s1 ) = 1 + numML(s1) 
+        if p1 == Left /\ t1 == M .
+    ceq numML( P( t1 , p1 ) , s1 ) = numML(s1) 
+        if p1 == Right  .
+    ceq numML( P( t1 , p1 ) , s1 ) = numML(s1) 
+        if t1 == G  .
+
+    eq numGL(nil) = 0 .
+    eq numGL(b1) = 0 .
+    ceq numGL(P(t1,p1),s1) = 1 + numGL(s1) 
+        if p1 == Left /\ t1 == G .
+    ceq numGL(P(t1,p1),s1) = numGL(s1) 
+        if p1 == Right .
+    ceq numGL(P(t1,p1),s1) = numGL(s1) 
+        if t1 == M .
+    
+    eq numMR(nil) = 0 .
+    eq numMR(b1) = 0 .
+    ceq numMR(P(t1,p1),s1) = 1 + numMR(s1) 
+        if p1 == Right /\ t1 == M .
+    ceq numMR(P(t1,p1),s1) = numMR(s1) 
+        if p1 == Left  .
+    ceq numMR(P(t1,p1),s1) = numMR(s1) 
+        if t1 == G .
+
+    eq numGR(nil) = 0 .
+    eq numGR(b1) = 0 .
+    ceq numGR(P(t1,p1),s1) = 1 + numGR(s1) 
+        if p1 == Right /\ t1 == G . 
+    ceq numGR(P(t1,p1),s1) = numGR(s1) 
+        if p1 == Left . 
+    ceq numGR(P(t1,p1),s1) = numGR(s1) 
+        if t1 == M . 
+
+    ceq Safe(s1) =  false
+        if (numMR(s1) < numGR(s1)) /\ (numMR(s1) > 0 ) .
+
+    ceq Safe(s1) =  false
+        if (numML(s1) > 0) /\ (numML(s1) < numGL(s1)) .
+    
+    ceq Safe(s1) =  true
+        if (numMR(s1) == numGR(s1)) /\ (numML(s1) == numGL(s1)) .
+    
+    ceq Safe(s1) =  true
+        if (numMR(s1) > numGR(s1)) /\ (numML(s1) == 0) .
+
+    ceq Safe(s1) =  true
+        if (numMR(s1) == 0 ) /\ (numML(s1) > numGL(s1)) .
+
+endfm
+
+
+
+mod GM_SYSTEM is 
+    including BOAT .
+    including SAFE .
+    including PASSENGER .
+    including POSITION .
+
+    var L R : Position .
+
+    op init : -> State .
+    eq init = P(M,Left), P(M,Left), P(M,Left), P(G,Left), P(G,Left), P(G,Left), B(Left) . 
+    op finish : -> State .
+    eq finish = P(M,Right), P(M,Right), P(M,Right), P(G,Right), P(G,Right), P(G,Right), B(Right) . 
+
+    ---var B1 : Boat .
+    ---vars P1 P2 P3 P4 P5 P6 : Passenger .
+    vars t1 t2 t3 t4 t5 t6 : Type .
+    vars p1 p2 p3 p4 p5 p6 : Position .
+    vars s1 s2 s3 s4 : State .
+
+
+    crl s1, P(t1,p1), s2, P(t2,p1), s3, B(p1) => 
+        s1, P(t1,!(p1)), s2, P(t2,!(p1)), s3, B(!(p1))
+        if Safe(s1, P(t1,!(p1)), s2, P(t2,!(p1)), s3 )
+            == true .
+
+    crl s1, P(t1,p1), s2, B(p1) => 
+        s1, P(t1,!(p1)), s2, B(!(p1))
+        if Safe(s1, P(t1,!(p1)), s2 )
+            == true . 
+
+endm
+
+--- search [1] init =>* state(M U) . 找到一个解
+--- search [1,10] init =>* state(M I U I U) . 10步内找一个解
+    *** show path 9 . 显示到state 9的路径
+    *** show  search graph .显示所有图

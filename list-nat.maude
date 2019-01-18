@@ -1,0 +1,55 @@
+fmod LIST-NAT is 
+    protecting NAT .
+    sort List-Nat .
+    subsort Nat  < List-Nat .
+    sort List-NatPair .
+    
+    op <_;_> : List-Nat List-Nat -> List-NatPair [ctor] .
+    op nil : -> List-Nat [ctor] .
+    op _,_ : List-Nat List-Nat -> List-Nat [ctor assoc id: nil] .
+
+    var N : Nat .
+    var LN : List-Nat .
+    ---len
+    op len : List-Nat -> Nat .
+    eq len(N) = 1 .
+    eq len(nil) = 0 .
+    eq len(N,LN) = len(LN) + 1 .
+    
+    ---reverse
+    op reverse : List-Nat -> List-Nat .
+    eq reverse(nil) = nil .
+---    eq reverse(N) = N .
+    eq reverse(N,LN) = reverse(LN),N .
+
+    ---sortList
+    op sortList : List-Nat -> List-Nat .
+    op LessEqN : Nat List-Nat -> List-Nat .
+    op GreaterN : Nat  List-Nat -> List-Nat .
+    
+    eq sortList(nil) = nil .
+---    eq sortList(N,LN) = sortList(LessEqN(N,LN)), N ,sortList(GreaterN(N,LN)) .   
+    eq LessEqN(N,nil) = nil .
+    var N1 : Nat .
+    eq LessEqN(N,(N1,LN)) = if N1 <= N then N1,LessEqN(N,LN) else LessEqN(N,LN) fi .
+
+    eq GreaterN(N,nil) = nil .
+    eq GreaterN(N,(N1,LN)) = if N1 > N then N1,GreaterN(N,LN) else GreaterN(N,LN) fi .
+
+    ---split
+    op split : Nat List-Nat -> List-NatPair .
+    eq split(N,nil) = < nil ; nil > .
+    vars LN1 LN2 : List-Nat .
+    ceq split(N,(N1,LN)) =
+      if N1 <= N then
+	  < N1 , LN1 ; LN2 >
+  	else
+	  < LN1 ; N1, LN2 > fi
+       if < LN1 ; LN2 > := split(N,LN) .
+      --- quicksort method
+    ceq sortList(N,LN) =
+	sortList(LN1) , N , sortList(LN2)
+      if < LN1 ; LN2 > := split(N,LN) .
+    
+    
+endfm

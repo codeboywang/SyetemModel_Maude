@@ -1,0 +1,46 @@
+fmod BST is
+    including NAT .
+    sort BinaryTree .
+    sort BinarySearchTree .
+    subsort BinarySearchTree < BinaryTree .
+
+    op et : -> BinarySearchTree .
+    op <_,_,_> : Nat BinarySearchTree BinarySearchTree -> BinarySearchTree .
+
+    var N : Nat .
+    vars L R : BinaryTree .
+
+    cmb < N, L, R > : BinarySearchTree
+      if L =/= et /\
+         L :: BinarySearchTree /\
+         rightmostNode(L) < N .
+
+    cmb < N, L, R > : BinarySearchTree
+      if R =/= et /\
+         R :: BinarySearchTree /\
+         leftmostNode(R) > N .
+     
+    cmb < N, L, R > : BinarySearchTree
+      if L =/= et /\
+         R =/= et /\
+         L :: BinarySearchTree /\
+         R :: BinarySearchTree /\
+         rightmostNode(L) < N /\
+         leftmostNode(R) > N .
+
+    mb < N, et, et > : BinarySearchTree .
+
+    ops leftmostNode rightmostNode : BinaryTree -> Nat .
+    op errorNat : -> [Nat] .
+    eq rightmostNode(et) = errorNat .
+    eq rightmostNode(< N, L, R >) =
+	if R == et then N else rightmostNode(R)
+      fi .
+
+    eq leftmostNode(et) = errorNat .
+    eq leftmostNode(< N, L, R >) =
+       if L == et then N else leftmostNode(L)
+       fi .
+
+        
+endfm

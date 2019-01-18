@@ -1,0 +1,17 @@
+fmod PNAT is
+    sort Nat .
+    
+    op 0 : -> Nat .  
+    op s_ : Nat -> Nat .
+    
+    vars Y X : Nat .
+    
+    op _+_ : Nat Nat -> Nat [assoc comm] .
+    op _*_ : Nat Nat -> Nat [assoc comm] . 
+    
+    eq 0 + X = X .
+    eq s X + Y = s (X + Y) .
+
+    eq 0 * X = 0 .
+    eq s X * Y = (X * Y) + Y .
+endfm

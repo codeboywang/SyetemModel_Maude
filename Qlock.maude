@@ -1,0 +1,43 @@
+fmod LOCATION is
+    sort Location .
+    ops rs ws cs : -> Location .
+
+endfm
+
+fmod PROCESS is
+    sort Process .
+    ops p1 p2 p3 : -> Process .
+
+endfm
+
+fmod QUEUE is
+    sort Queue .
+    including PROCESS .
+    subsort Process < Queue .
+    op _,_ : Queue Queue -> Queue  [ assoc  id: empty ] .
+    *** empty 是 _的幺元
+    op empty : -> Queue .
+endfm
+
+mod SYSTEM is 
+    including LOCATION .
+    including PROCESS .
+    including QUEUE .
+
+    sort State .
+    op pc : Process Location -> State .
+    op queue : Queue -> State .
+    op __ : State State -> State [ assoc  comm ] .
+    *** pc(p1,rs)
+
+    var P P' : Process .
+    var Q : Queue .
+    rl [wait] : pc(P,rs) queue(Q) => pc(P,ws) queue((P,Q)) .
+    rl [enter] : pc(P,ws) queue((Q,P))  => pc(P,cs) queue((Q,P)) .
+    rl [exit] : pc(P,cs) queue((Q,P')) => pc(P,rs) queue(Q) .
+
+    op init : -> State .
+    eq init = pc( p1, rs ) pc( p2, rs ) pc( p3, rs ) queue( empty ) .
+    ***rew [1] init . init状态开始向后走一步
+    ***search init =>! S:State . 搜索当前init状态到一个无法操作的状态
+endm

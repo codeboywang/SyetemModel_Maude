@@ -1,0 +1,19 @@
+mod MIU is 
+    sort miu .
+    sort State .
+    ops  M I U : -> miu .
+    op _ _ : miu miu -> miu [assoc] .
+    op state : miu -> State .
+
+    vars s1 s2 : miu .
+    rl [appendU] : state(s1 I) => state(s1 I U) .
+    rl [appendDouble] : state(M s1) => state(M s1 s1) .
+    rl [deleteI] : state(s1 I I I s2) => state(s1 s2) .
+    rl [deleteU] : state(s1 U U s2) => state(s1 s2) . 
+
+    op init : -> State .
+    eq init = state(M I) .
+endm
+
+--- search [1] init =>* state(M U) . 找到一个解
+--- search [1,10] init =>* state(M I U I U) . 10步内找一个解

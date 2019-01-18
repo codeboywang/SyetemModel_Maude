@@ -1,0 +1,37 @@
+fmod SQRT is
+    including NAT .
+
+    op sqrt : Nat -> Nat .
+    op sqrt' : Nat Nat -> Nat .
+    vars N N' : Nat .
+
+    eq sqrt(N) = sqrt'(N,0) .
+    eq sqrt'(N,N') =
+      if N' * N' <= N and N < (N' + 1) * (N' + 1)
+	then N'
+	else sqrt'(N, N' + 1)
+	fi .
+
+    op sqrt2 : Nat -> Nat .
+    op sqrt2' : Nat Nat Nat Nat -> Nat .
+    op pivot : Nat Nat -> Nat .
+    vars L R X : Nat .
+
+    eq sqrt2(N) = sqrt2'(0,N,pivot(0,N),N) .
+    eq sqrt2'(L,R,X,N) = (if L == R
+	then L
+	else (
+	  if X * X > N
+	    then sqrt2'(L, sd(X,1) , pivot(L,sd(X,1)), N)
+	    else sqrt2'(X,R,pivot(X,R),N)
+	    fi)
+      fi) .
+    
+    eq pivot(L,R) = (if (sd(R,L) divides 2) == false
+	  then  (sd(R,L) quo 2 + L)
+	  else  ((sd(R,L) + 1) quo 2 + L)
+	    fi) .
+    
+
+endfm
+    
